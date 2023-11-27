@@ -29,6 +29,8 @@ async function run() {
     const featurePropertiesCollection = client.db('everNest').collection('featureProperties')
     const userCollection = client.db('everNest').collection('users')
     const allPropertiesCollection = client.db('everNest').collection('allProperties')
+    const wishlistCollection = client.db('everNest').collection('wishlist')
+    const allReviewsCollection = client.db('everNest').collection('allReviews')
 
      //jwt related api
      app.post('/jwt',async (req, res) =>{
@@ -180,6 +182,26 @@ async function run() {
     app.get('/allProperties',async(req, res)=>{
      const result = await allPropertiesCollection.find().toArray();
      res.send(result);
+})
+
+// add to wish list post from client side
+app.post('/wishlist',async(req,res)=>{
+  const item = req.body;
+  const result = await wishlistCollection.insertOne(item)
+  res.send(result);
+ })
+
+ // all reviews post from Client side
+app.post('/allReviews',async(req,res)=>{
+  const review = req.body;
+  const result = await allReviewsCollection.insertOne(review)
+  res.send(result);
+ })
+
+  //all reviews read /get sent client side
+  app.get('/allReviews',async(req, res)=>{
+    const result = await allReviewsCollection.find().toArray();
+    res.send(result);
 })
 
     // Send a ping to confirm a successful connection
