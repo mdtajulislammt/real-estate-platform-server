@@ -28,6 +28,7 @@ async function run() {
   try {
     const featurePropertiesCollection = client.db('everNest').collection('featureProperties')
     const userCollection = client.db('everNest').collection('users')
+    const allPropertiesCollection = client.db('everNest').collection('allProperties')
 
      //jwt related api
      app.post('/jwt',async (req, res) =>{
@@ -173,6 +174,11 @@ async function run() {
     //feature Properties read /get
     app.get('/featureProperties',async(req, res)=>{
      const result = await featurePropertiesCollection.find().toArray();
+     res.send(result);
+})
+    //allProperties read /get
+    app.get('/allProperties',async(req, res)=>{
+     const result = await allPropertiesCollection.find().toArray();
      res.send(result);
 })
 
