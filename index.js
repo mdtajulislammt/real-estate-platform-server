@@ -116,7 +116,7 @@ async function run() {
 
 
     //users related api
-    app.get('/users',verifyToken,verifyAdmin,async(req, res)=>{
+    app.get('/users',async(req, res)=>{
      const result = await userCollection.find().toArray();
      res.send(result);
     })
