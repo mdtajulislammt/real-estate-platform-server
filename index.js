@@ -191,6 +191,20 @@ app.post('/wishlist',async(req,res)=>{
   res.send(result);
  })
 
+   //all wishlist read /get sent client side
+   app.get('/wishlist',async(req, res)=>{
+    const result = await wishlistCollection.find().toArray();
+    res.send(result);
+})
+
+// delete wishList from client side
+app.delete('/wishlist/:id', async(req,res)=>{
+  const id = req.params.id;
+  const query = {_id: new ObjectId(id)};
+  const result = await wishlistCollection.deleteOne(query);
+  res.send(result);
+ })
+
  // all reviews post from Client side
 app.post('/allReviews',async(req,res)=>{
   const review = req.body;
@@ -203,6 +217,14 @@ app.post('/allReviews',async(req,res)=>{
     const result = await allReviewsCollection.find().toArray();
     res.send(result);
 })
+
+// delete AllReview from client side
+app.delete('/allReviews/:id', async(req,res)=>{
+  const id = req.params.id;
+  const query = {_id: new ObjectId(id)};
+  const result = await allReviewsCollection.deleteOne(query);
+  res.send(result);
+ })
 
     // Send a ping to confirm a successful connection
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
