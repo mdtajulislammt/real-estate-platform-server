@@ -3,6 +3,7 @@ const  cors = require('cors');
 const jwt = require('jsonwebtoken');
 const app = express();
 require ("dotenv").config();
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY )
 const port = process.env.PORT || 5000;
 
 
@@ -31,6 +32,7 @@ async function run() {
     const allPropertiesCollection = client.db('everNest').collection('allProperties')
     const wishlistCollection = client.db('everNest').collection('wishlist')
     const allReviewsCollection = client.db('everNest').collection('allReviews')
+    const userWishOfferCollection = client.db('everNest').collection('userWishOffer')
 
      //jwt related api
      app.post('/jwt',async (req, res) =>{
@@ -205,6 +207,19 @@ app.delete('/wishlist/:id', async(req,res)=>{
   res.send(result);
  })
 
+  // userWishOffer post from Client side
+app.post('/userWishOffer',async(req,res)=>{
+  const review = req.body;
+  const result = await userWishOfferCollection.insertOne(review)
+  res.send(result);
+ })
+
+    //all reviews read /get sent client side
+    app.get('/userWishOffer',async(req, res)=>{
+      const result = await userWishOfferCollection.find().toArray();
+      res.send(result);
+  })
+
  // all reviews post from Client side
 app.post('/allReviews',async(req,res)=>{
   const review = req.body;
@@ -212,9 +227,11 @@ app.post('/allReviews',async(req,res)=>{
   res.send(result);
  })
 
+
   //all reviews read /get sent client side
   app.get('/allReviews',async(req, res)=>{
-    const result = await allReviewsCollection.find().toArray();
+
+    const result = await allReviewsCollection.find().sort({ _id: -1 }).toArray();
     res.send(result);
 })
 
@@ -225,6 +242,22 @@ app.delete('/allReviews/:id', async(req,res)=>{
   const result = await allReviewsCollection.deleteOne(query);
   res.send(result);
  })
+
+ //payment intent 
+ app.post('/create-payment-intent', async(req,res)=>{
+  const {price} = req.body;
+  const amount = parseInt(price*100)
+
+  const paymentIntent = await stripe.paymentIntents.create({
+   amount: amount,
+   currency: 'usd',
+   payment_method_types: ['card']
+  });
+
+  res.send({
+   clientSecret: paymentIntent.client_secret 
+  })
+})
 
     // Send a ping to confirm a successful connection
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
