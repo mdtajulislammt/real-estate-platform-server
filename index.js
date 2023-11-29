@@ -186,6 +186,21 @@ async function run() {
      res.send(result);
 })
 
+// allProperties post from client side
+app.post('/allProperties',async(req,res)=>{
+  const item = req.body;
+  const result = await allPropertiesCollection.insertOne(item)
+  res.send(result);
+ })
+
+  //allProperties Delete from client side 
+  app.delete('/allProperties/:id',verifyToken,verifyAgent, async(req, res)=>{
+    const id = req.params.id;
+    const query = {_id: new ObjectId(id)};
+    const result = await allPropertiesCollection.deleteOne(query);
+    res.send(result);
+   })
+
 // add to wish list post from client side
 app.post('/wishlist',async(req,res)=>{
   const item = req.body;
