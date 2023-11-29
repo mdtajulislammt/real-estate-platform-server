@@ -33,6 +33,7 @@ async function run() {
     const wishlistCollection = client.db('everNest').collection('wishlist')
     const allReviewsCollection = client.db('everNest').collection('allReviews')
     const userWishOfferCollection = client.db('everNest').collection('userWishOffer')
+    const paymentsCollection = client.db('everNest').collection('payments')
 
      //jwt related api
      app.post('/jwt',async (req, res) =>{
@@ -202,7 +203,7 @@ app.post('/allProperties',async(req,res)=>{
    })
 
     // update My post
-    app.put("/allProperties/:id", async (req, res) => {
+    app.put("/allProperties/:id",verifyToken,verifyAgent, async (req, res) => {
       const id = req.params.id;
       const data = req.body;
       const options = { upsert: true };
@@ -289,6 +290,9 @@ app.delete('/allReviews/:id', async(req,res)=>{
   res.send(result);
  })
 
+
+
+
  //payment intent 
  app.post('/create-payment-intent', async(req,res)=>{
   const {price} = req.body;
@@ -304,6 +308,13 @@ app.delete('/allReviews/:id', async(req,res)=>{
    clientSecret: paymentIntent.client_secret 
   })
 })
+
+//payment history post 
+app.post('/payments',async(req,res)=>{
+  const payment = req.body;
+  const result = await paymentsCollection.insertOne(payment)
+  res.send(result);
+ })
 
     // Send a ping to confirm a successful connection
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
