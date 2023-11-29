@@ -201,6 +201,37 @@ app.post('/allProperties',async(req,res)=>{
     res.send(result);
    })
 
+    // update My post
+    app.put("/allProperties/:id", async (req, res) => {
+      const id = req.params.id;
+      const data = req.body;
+      const options = { upsert: true };
+      const filter = {
+        _id: new ObjectId(id),
+      };
+      const updateProperty = {
+        $set: {
+          title: data.title,
+      location: data.location,
+      agentName: data.agentName,
+      agentImage: data.agentImage,
+      verificationStatus: data.verificationStatus,
+      description: data.description,
+      img: data.img,
+      maxPrice: data.maxPrice,
+      minPrice: data.minPrice,
+      status:data.status,
+      agentEmail: data.agentEmail,
+        },
+      };
+      const result = await allPropertiesCollection.updateOne(
+        filter,
+        updateProperty,
+        options
+      );
+      res.send(result);
+    });
+
 // add to wish list post from client side
 app.post('/wishlist',async(req,res)=>{
   const item = req.body;
