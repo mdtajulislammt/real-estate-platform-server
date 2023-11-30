@@ -261,11 +261,39 @@ app.post('/userWishOffer',async(req,res)=>{
   res.send(result);
  })
 
-    //all reviews read /get sent client side
+    //all userWishOffer read /get sent client side
     app.get('/userWishOffer',async(req, res)=>{
       const result = await userWishOfferCollection.find().toArray();
       res.send(result);
   })
+
+  //property Accepted
+  app.patch('/userWishOffer/accepted/:id',verifyToken,verifyAgent, async (req, res) => {
+    const id = req.params.id;
+    const filter = {_id: new ObjectId(id)};
+    const updatedDoc = {
+      $set: {
+        status:'accepted'
+      }
+      
+    }
+    const result = await userWishOfferCollection.updateOne(filter, updatedDoc)
+    res.send(result)
+   })
+
+  //property rejected
+  app.patch('/userWishOffer/rejected/:id',verifyToken,verifyAgent, async (req, res) => {
+    const id = req.params.id;
+    const filter = {_id: new ObjectId(id)};
+    const updatedDoc = {
+      $set: {
+        status:'rejected'
+      }
+      
+    }
+    const result = await userWishOfferCollection.updateOne(filter, updatedDoc)
+    res.send(result)
+   })
 
  // all reviews post from Client side
 app.post('/allReviews',async(req,res)=>{
@@ -283,7 +311,7 @@ app.post('/allReviews',async(req,res)=>{
 })
 
 // delete AllReview from client side
-app.delete('/allReviews/:id', async(req,res)=>{
+app.delete('/allReviews/:id',verifyToken, async(req,res)=>{
   const id = req.params.id;
   const query = {_id: new ObjectId(id)};
   const result = await allReviewsCollection.deleteOne(query);
@@ -316,6 +344,17 @@ app.post('/payments',async(req,res)=>{
   res.send(result);
  })
 
+
+  //payment read /get sent client side
+  app.get('/payments',async(req, res)=>{
+    const result = await paymentsCollection.find().toArray();
+    res.send(result);
+  })
+
+
+
+
+
     // Send a ping to confirm a successful connection
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
@@ -323,9 +362,10 @@ app.post('/payments',async(req,res)=>{
 
   }
 }
+
+
+
 run().catch(console.dir);
-
-
 
 
 app.get('/', (req, res) => {
