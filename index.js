@@ -3,8 +3,8 @@ const  cors = require('cors');
 const jwt = require('jsonwebtoken');
 const app = express();
 require ("dotenv").config();
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY )
 const port = process.env.PORT || 5000;
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY )
 
 
 
@@ -69,6 +69,17 @@ async function run() {
       }
       next();
    }
+     //use verify agent after verifyToken
+     const verifyFraud = async(req, res, next)=>{
+      const email = req.decoded.email;
+      const query = {email: email}
+      const user = await userCollection.findOne(query)
+      const isFraud = user?.role === 'fraud';
+      if(isFraud){
+         return res.status(403).send({message:'forbidden access'})
+      }
+      next();
+   }
 
 
 
@@ -118,7 +129,22 @@ async function run() {
        }
        res.send({agent});
     })
+    //user verify agent after verify token
+    app.get('/users/fraud/:email',verifyToken, async(req,res)=>{
+      const email = req.params.email;
+      if(email!== req.decoded.email){
+       return res.status(403).send({message:'forbidden access'});
+      }
+      const query = {email: email};
+      const user = await userCollection.findOne(query);
+       let fraud  = false;
+       if(user){
+        fraud = await user?.role === 'fraud';
+       }
+       res.send({fraud});
+    })
 
+    
 
 
     //users related api
@@ -161,6 +187,20 @@ async function run() {
      const result = await userCollection.updateOne(filter, updatedDoc)
      res.send(result)
     })
+    //user fraud confirm
+    app.patch('/users/fraud/:id',verifyToken,verifyAdmin, async (req, res) => {
+     const id = req.params.id;
+     const filter = {_id: new ObjectId(id)};
+     const updatedDoc = {
+       $set: {
+         role:'fraud'
+       }
+       
+     }
+     const result = await userCollection.updateOne(filter, updatedDoc)
+     res.send(result)
+    })
+    
 
    
 
@@ -232,6 +272,34 @@ app.post('/allProperties',async(req,res)=>{
       );
       res.send(result);
     });
+
+
+     //verify that all properties
+     app.patch('/allProperties/verify/:id',verifyToken,verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)};
+      const updatedDoc = {
+        $set: {
+          verificationStatus:'Verified'
+        }
+        
+      }
+      const result = await allPropertiesCollection.updateOne(filter, updatedDoc)
+      res.send(result)
+     })
+     //verify that all properties
+     app.patch('/allProperties/reject/:id',verifyToken,verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)};
+      const updatedDoc = {
+        $set: {
+          verificationStatus:'Not Verified'
+        }
+        
+      }
+      const result = await allPropertiesCollection.updateOne(filter, updatedDoc)
+      res.send(result)
+     })
 
 // add to wish list post from client side
 app.post('/wishlist',async(req,res)=>{
